@@ -1,0 +1,12 @@
+#main-display {
+  z-index: 1;
+  color: aliceblue;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#app-wrapper {
+  width: 100%;
+  height: 100%;
+}
