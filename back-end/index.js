@@ -5,6 +5,8 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 
+let windowsOpen = [];
+
 /**
  * io
  * @type {Server}
@@ -13,19 +15,17 @@ const io = new Server(server, {
   cors: "http://localhost:5000",
 });
 
-app.get("/", (req, res) => {
-  console.log("hello");
-});
-
 io.on("connection", (socket) => {
-  console.log("user connected");
-
-  socket.on("getShape", (socket) => {
-    console.log(socket);
+  socket.on("setWindows", (socket) => {
+    windowsOpen.push(socket);
+  });
+  socket.on("getWindows", () => {
+    socket.emit("deliverWindows", windowsOpen);
   });
 
-  io.on("disconnect", () => {
-    console.log("user disconnected");
+  socket.on("disconnect", (socket) => {
+    let item = windowsOpen.indexOf(socket);
+    windowsOpen.pop(item);
   });
 });
 
