@@ -1,18 +1,13 @@
 import React, { useEffect } from "react";
 import "./App.css";
 import Canvas from "./Components/Canvas/Canvas";
-import { io } from "socket.io-client";
+import WindowManager from "./Assets/WindowManager/WindowManager";
 
 const App = () => {
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const windowManager = new WindowManager("http://localhost:5000");
 
-    socket.emit("getShape", {
-      x: window.screenLeft,
-      y: window.screenTop,
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
+    windowManager.init("window");
   }, []);
   return (
     <div id="app-wrapper">
