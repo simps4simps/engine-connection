@@ -1,25 +1,35 @@
 import { io } from "socket.io-client";
 
 class WindowManager {
-  constructor(socketString) {
+  async init(data, socketString) {
+    this.socketString = socketString;
     this.socket = io(socketString);
-  }
-
-  init(data) {
     let dimensions = this.getDimensions();
 
-    this.socket.emit("getWindows");
-    this.socket.on("deliverWindows", (socket) => {
-      this.id = socket.length + 1;
-      console.log(this.id);
-    });
+    this.windows = await this.getWindows();
 
     this.winData = {
       dimensions,
-      id: this.id,
+      id: this.socket.id,
       data,
+      windowNumber: this.windows.length + 1,
     };
 
+    this.updateWindows();
+  }
+
+  getWindows() {
+    let promise = new Promise((res, rej) => {
+      this.socket.emit("getWindows");
+      this.socket.on("deliverWindows", (socket) => {
+        res(socket);
+      });
+    });
+
+    return promise;
+  }
+
+  updateWindows() {
     this.socket.emit("setWindows", this.winData);
   }
 
@@ -32,6 +42,21 @@ class WindowManager {
     };
 
     return dimensions;
+  }
+
+  update() {
+    let dimensions = this.getDimensions();
+
+    if (
+      dimensions.x != this.winData.dimensions.x ||
+      dimensions.y != this.winData.dimensions.y ||
+      dimensions.width != this.winData.dimensions.width ||
+      dimensions.height != this.winData.dimensions.height
+    ) {
+      this.winData.dimensions = dimensions;
+
+      this.updateWindows();
+    }
   }
 }
 
