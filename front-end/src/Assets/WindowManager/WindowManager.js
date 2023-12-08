@@ -1,32 +1,55 @@
 import { io } from "socket.io-client";
 
 class WindowManager {
-  async init(data, socketString) {
-    this.socketString = socketString;
+  socket;
+  windows;
+  winData;
+  id;
+  winNumber;
+  data;
+
+  constructor(socketString) {
     this.socket = io(socketString);
-    let dimensions = this.getDimensions();
+  }
+  init(metaData) {
+    this.data = metaData;
+    this.buildWinData();
 
-    this.windows = await this.getWindows();
-
-    this.winData = {
-      dimensions,
-      id: this.socket.id,
-      data,
-      windowNumber: this.windows.length + 1,
-    };
-
-    this.updateWindows();
+    this.socket.on("windowsChanged", (data) => {
+      this.checkNewWindows(data);
+    });
   }
 
-  getWindows() {
-    let promise = new Promise((res, rej) => {
-      this.socket.emit("getWindows");
-      this.socket.on("deliverWindows", (socket) => {
-        res(socket);
+  buildWinData() {
+    this.socket.emit("getWindows");
+
+    this.socket.on("deliverWindows", (res) => {
+      this.winData = new Promise((resolve, reject) => {
+        this.windows = res;
+        this.id = this.socket.id;
+        this.winNumber = res.length;
+
+        resolve({
+          id: this.id,
+          data: this.data,
+          winNumber: this.winNumber + 1,
+        });
+      }).then((res) => {
+        this.winData = res;
+        console.log(res);
+        this.updateWindows();
       });
     });
+  }
 
-    return promise;
+  checkNewWindows(data) {
+    this.windows = data.windowsOpen;
+    if (data.index < this.winData.winNumber) {
+      this.winData.winNumber -= 1;
+
+      this.updateWindows();
+      console.log(this.winData);
+    }
   }
 
   updateWindows() {
