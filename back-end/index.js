@@ -16,16 +16,32 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("setWindows", (socket) => {
-    windowsOpen.push(socket);
+  socket.on("setWindows", (data) => {
+    if (windowsOpen.length != 0) {
+      for (let index = 0; index < windowsOpen.length; index++) {
+        if (windowsOpen[index].id == data.id) {
+          windowsOpen[index] = data;
+          return;
+        }
+      }
+    }
+    windowsOpen.push(data);
+    console.log(windowsOpen);
   });
+
   socket.on("getWindows", () => {
     socket.emit("deliverWindows", windowsOpen);
   });
 
-  socket.on("disconnect", (socket) => {
-    let item = windowsOpen.indexOf(socket);
-    windowsOpen.pop(item);
+  socket.on("disconnect", () => {
+    for (let index = 0; index < windowsOpen.length; index++) {
+      if (windowsOpen[index].id != socket.id) continue;
+      windowsOpen.splice(index, 1);
+      io.sockets.emit("windowsChanged", {
+        index,
+        windowsOpen,
+      });
+    }
   });
 });
 
