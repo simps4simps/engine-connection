@@ -17,6 +17,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   socket.on("setWindows", (data) => {
+    socket.emit("sendData", data);
     if (windowsOpen.length != 0) {
       for (let index = 0; index < windowsOpen.length; index++) {
         if (windowsOpen[index].id == data.id) {
@@ -25,8 +26,8 @@ io.on("connection", (socket) => {
         }
       }
     }
+
     windowsOpen.push(data);
-    console.log(windowsOpen);
   });
 
   socket.on("getWindows", () => {
