@@ -33,10 +33,10 @@ class WindowManager {
           id: this.id,
           data: this.data,
           winNumber: this.winNumber + 1,
+          dimensions: this.getDimensions(),
         });
       }).then((res) => {
         this.winData = res;
-        console.log(res);
         this.updateWindows();
       });
     });
@@ -48,7 +48,6 @@ class WindowManager {
       this.winData.winNumber -= 1;
 
       this.updateWindows();
-      console.log(this.winData);
     }
   }
 
